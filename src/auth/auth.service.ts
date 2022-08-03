@@ -32,7 +32,7 @@ export class AuthService {
     });
 
     return {
-      message: 'signup was succefull',
+      message: 'Signup was successfull. User created.',
     };
   }
 
@@ -63,10 +63,13 @@ export class AuthService {
     const token = await this.signToken({ id, email });
 
     if (!token) {
-      throw new ForbiddenException();
+      throw new ForbiddenException('Could not signin');
     }
 
-    response.cookie('token', token);
+    response.cookie('token', token, {
+      expires: new Date(Date.now() + 900000),
+      httpOnly: true,
+    });
 
     return response.send({
       message: 'Logged in successfully',
@@ -93,8 +96,10 @@ export class AuthService {
   }
 
   async signToken(payload: { id: string; email: string }) {
-    return this.jwtService.signAsync(payload, {
+    const token = this.jwtService.signAsync(payload, {
       secret: jwtSecret,
     });
+
+    return token;
   }
 }
